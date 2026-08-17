@@ -1,0 +1,47 @@
+# Compiled Python files
+*.pyc
+__pycache__/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+*.env.*
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+
+# Build artifacts
+dist/
+build/
+target/
+*.egg-info/
+
+# Temporary files
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Dependency cache
+.node_modules/
+.mypy_cache/
+.pytest_cache/
+.gradle/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
