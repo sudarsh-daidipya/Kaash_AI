@@ -1,7 +1,21 @@
 import streamlit as st
 import pandas as pd
-import io 
-import plotly.express as px 
+import io
+import plotly.express as px
+
+# --- Step 1: Data Input Helpers ---
+def load_data(file):
+    """Loads CSV or Excel files into a DataFrame."""
+    try:
+        if file.name.endswith('.csv'):
+            return pd.read_csv(file)
+        elif file.name.endswith('.xlsx'):
+            return pd.read_excel(file)
+        else:
+            return None
+    except Exception as e:
+        st.error(f"Error loading file: {e}")
+        return None
 
 def load_dataframe(uploaded_file):
     """Reads the uploaded file into a Pandas DataFrame."""
@@ -13,6 +27,42 @@ def load_dataframe(uploaded_file):
     except Exception as e:
         st.error(f"Error loading {uploaded_file.name}: {e}")
         return None
+
+# --- Step 2: Similarity Engine ---
+def analyze_schemas(base_df, target_df):
+    """Analyzes schemas and returns matching, missing, and extra columns."""
+    base_cols = set(base_df.columns)
+    target_cols = set(target_df.columns)
+    
+    matching_cols = list(base_cols & target_cols)
+    missing_in_target = list(base_cols - target_cols)
+    extra_in_target = list(target_cols - base_cols)
+    
+    return matching_cols, missing_in_target, extra_in_target
+
+# --- Step 3 & 4: Merge Logic ---
+def execute_merge(base_df, target_df, join_key, join_type):
+    """Executes the pandas merge operation with error handling."""
+    try:
+        # Ensure join keys are treated as strings to avoid dtype mismatch errors
+        base_df[join_key] = base_df[join_key].astype(str)
+        target_df[join_key] = target_df[join_key].astype(str)
+        
+        merged_df = pd.merge(base_df, target_df, on=join_key, how=join_type.lower())
+        return merged_df, None
+    except Exception as e:
+        return None, str(e)
+
+def get_download_buffer(df, file_type):
+    """Generates a download buffer for CSV or Excel."""
+    if file_type == 'csv':
+        csv = df.to_csv(index=False).encode('utf-8')
+        return csv
+    elif file_type == 'excel':
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Merged_Data')
+        return output.getvalue()
 
 def initialize_similarity_engine(base_file, target_file):
     """Similarity Engine with Horizontal Tab Layout"""

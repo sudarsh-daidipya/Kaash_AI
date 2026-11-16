@@ -1,5 +1,9 @@
 import streamlit as st
-from premium_tier import matchmaker # Importing our new matchmaker logic
+import importlib
+from premium_tier import matchmaker
+
+# Force reload to ensure latest code is used
+importlib.reload(matchmaker)
 
 def render_page():
     st.header("👑 Enterprise Data Matchmaker")
@@ -23,5 +27,9 @@ def render_page():
     if base_file is not None and target_file is not None:
         st.success("Both datasets loaded successfully! Initializing Similarity Engine...")
         
-        # Trigger the Matchmaker Engine (Steps 2 & 3)
-        matchmaker.initialize_similarity_engine(base_file, target_file)
+        # Safety check: Ensure function exists
+        if hasattr(matchmaker, 'initialize_similarity_engine'):
+            # Trigger the Matchmaker Engine (Steps 2 & 3)
+            matchmaker.initialize_similarity_engine(base_file, target_file)
+        else:
+            st.error("Critical Error: Matchmaker engine function not found. Please restart the application.")
